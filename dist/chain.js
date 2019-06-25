@@ -76,7 +76,7 @@ var valC = new ValidateTest();
 var Company = /** @class */ (function () {
     function Company() {
         this.name = '';
-        this.age = 11;
+        this.age = 21;
         this.test = false;
         this.validate = {
             msg: [],

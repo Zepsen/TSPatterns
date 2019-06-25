@@ -1,8 +1,8 @@
 
-interface Handler {
-	setNext(handler: Handler): Handler;
+interface Handler<T> {
+	setNext(handler: Handler<T>): Handler<T>;
 
-	handle(request: Company): Company;
+	handle(request: T): T;
 }
 
 type Answer = {
@@ -10,15 +10,15 @@ type Answer = {
 	res: boolean
 }
 
-abstract class AbstractHandler implements Handler{
-	private next: Handler | null = null;
+abstract class AbstractHandler<T> implements Handler<T>{
+	private next: Handler<T> | null = null;
 	
-	setNext(handler: Handler): Handler {
+	setNext(handler: Handler<T>): Handler<T> {
 		this.next = handler;
 		return handler;
 	}
 
-	handle(request: Company): Company {			
+	handle(request: T): T {			
 		if(this.next) {					
 			return this.next.handle(request);
 		}
@@ -27,8 +27,13 @@ abstract class AbstractHandler implements Handler{
 	}
 }
 
-class ValidateName extends AbstractHandler {
-	public handle(request: Company): Company {
+interface IName {
+	name: string;
+	validate: Answer;
+}
+
+class ValidateName<T extends IName> extends AbstractHandler<T> {
+	public handle(request: T): T {
 		if(!request.name) {
 			request.validate.msg.push('Name is bad \n');
 			request.validate.res = false;
@@ -38,7 +43,7 @@ class ValidateName extends AbstractHandler {
 	}
 }
 
-class ValidateAge extends AbstractHandler {
+class ValidateAge extends AbstractHandler<Company> {
 	public handle(request: Company): Company {
 		if(request.age < 18) {
 			request.validate.msg.push('Age is bad \n');
@@ -49,7 +54,7 @@ class ValidateAge extends AbstractHandler {
 	}
 }
 
-class ValidateTest extends AbstractHandler {
+class ValidateTest extends AbstractHandler<Company> {
 	public handle(request: Company): Company {
 		if(!request.test) {
 			request.validate.msg.push('Test is bad \n');
@@ -61,12 +66,12 @@ class ValidateTest extends AbstractHandler {
 }
 
 let valA = new ValidateAge();
-let valB = new ValidateName();
+let valB = new ValidateName<Company>();
 let valC = new ValidateTest();
 
 class Company {
 	name: string = '';
-	age: number = 11;
+	age: number = 21;
 	test: boolean = false;
 
 	validate: Answer = {
@@ -74,6 +79,7 @@ class Company {
 		res: false
 	};
 }
+
 
 const company = new Company();
 valA.setNext(valB).setNext(valC);
